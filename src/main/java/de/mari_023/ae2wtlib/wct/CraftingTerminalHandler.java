@@ -19,6 +19,8 @@ import de.mari_023.ae2wtlib.wut.WUTHandler;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.menu.locator.MenuLocator;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.KeyCounter;
 
 public class CraftingTerminalHandler {
 

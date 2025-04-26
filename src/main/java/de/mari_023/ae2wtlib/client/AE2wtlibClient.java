@@ -1,6 +1,7 @@
 package de.mari_023.ae2wtlib.client;
 
 import de.mari_023.ae2wtlib.networking.ClientNetworkManager;
+import de.mari_023.ae2wtlib.networking.s2c.PickBlockPacket;
 import de.mari_023.ae2wtlib.networking.s2c.RestockAmountPacket;
 import de.mari_023.ae2wtlib.networking.s2c.UpdateRestockPacket;
 import de.mari_023.ae2wtlib.networking.s2c.UpdateWUTPackage;
@@ -28,5 +29,6 @@ public class AE2wtlibClient {
         ClientNetworkManager.registerClientBoundPacket(UpdateWUTPackage.NAME, UpdateWUTPackage::new);
         ClientNetworkManager.registerClientBoundPacket(UpdateRestockPacket.NAME, UpdateRestockPacket::new);
         ClientNetworkManager.registerClientBoundPacket(RestockAmountPacket.NAME, RestockAmountPacket::new);
+        ClientNetworkManager.registerClientBoundPacket(PickBlockPacket.NAME, PickBlockPacket::new);
     }
 }

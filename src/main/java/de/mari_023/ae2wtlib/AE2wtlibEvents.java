@@ -5,18 +5,21 @@ import java.util.function.Consumer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-
+import net.minecraftforge.network.PacketDistributor;
+import de.mari_023.ae2wtlib.networking.ClientNetworkManager;
 import de.mari_023.ae2wtlib.networking.ServerNetworkManager;
+import de.mari_023.ae2wtlib.networking.s2c.PickBlockPacket;
 import de.mari_023.ae2wtlib.networking.s2c.UpdateRestockPacket;
 import de.mari_023.ae2wtlib.terminal.ItemWT;
 import de.mari_023.ae2wtlib.wct.CraftingTerminalHandler;
 import de.mari_023.ae2wtlib.wct.magnet_card.MagnetHandler;
 import de.mari_023.ae2wtlib.wct.magnet_card.MagnetHost;
 import de.mari_023.ae2wtlib.wct.magnet_card.MagnetMode;
-
+import dev.architectury.networking.NetworkManager;
 import appeng.api.config.Actionable;
 import appeng.api.stacks.AEItemKey;
 import appeng.me.helpers.PlayerSource;
+import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 
 public class AE2wtlibEvents {
     /**
@@ -57,7 +60,8 @@ public class AE2wtlibEvents {
     }
 
     /**
-     * Attempts to insert an item stack from a player's inventory into an ME system linked to a terminal the player
+     * Attempts to insert an item stack from a player's inventory into an ME system
+     * linked to a terminal the player
      * carries.
      *
      * @param stack  The item stack being inserted
@@ -92,5 +96,51 @@ public class AE2wtlibEvents {
 
         stack.setCount(leftover);
         return leftover == 0;
+    }
+
+    public static void pickBlock(ItemStack stack) {
+        ClientNetworkManager.sendToServer(new PickBlockPacket(stack));
+    }
+
+    public static void pickBlock(ServerPlayer player, ItemStack stack) {
+        var cTHandler = CraftingTerminalHandler.getCraftingTerminalHandler(player);
+        ItemStack terminal = cTHandler.getCraftingTerminal();
+
+        if (cTHandler.getTargetGrid() == null)
+            return;
+        if (cTHandler.getTargetGrid().getStorageService() == null)
+            return;
+        var networkInventory = cTHandler.getTargetGrid().getStorageService().getInventory();
+        var playerSource = new PlayerSource(player, null);
+
+        var inventory = player.getInventory();
+        int targetSlot = inventory.getSuitableHotbarSlot();
+        var toReplace = inventory.getItem(targetSlot);
+
+        var insert = networkInventory.insert(AEItemKey.of(toReplace), toReplace.getCount(), Actionable.SIMULATE,
+                playerSource);
+        if (insert < toReplace.getCount())
+            return;
+        var extracted = networkInventory.extract(AEItemKey.of(stack), 32, Actionable.SIMULATE, playerSource);
+        if (extracted == 0)
+            return;
+
+        insert = networkInventory.insert(AEItemKey.of(toReplace), toReplace.getCount(), Actionable.MODULATE,
+                playerSource);
+        if (insert < toReplace.getCount()) {
+            toReplace.setCount(toReplace.getCount() - (int) insert);
+            inventory.setItem(targetSlot, toReplace);
+            return;
+        }
+
+        extracted = networkInventory.extract(AEItemKey.of(stack), 32, Actionable.MODULATE, playerSource);
+        if (extracted == 0) {
+            inventory.setItem(targetSlot, ItemStack.EMPTY);
+            return;
+        }
+        stack.setCount((int) extracted);
+        inventory.setItem(targetSlot, stack);
+        inventory.selected = targetSlot;
+        player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
     }
 }

@@ -7,6 +7,7 @@ import de.mari_023.ae2wtlib.hotkeys.MagnetHotkeyAction;
 import de.mari_023.ae2wtlib.hotkeys.RestockHotkeyAction;
 import de.mari_023.ae2wtlib.networking.ServerNetworkManager;
 import de.mari_023.ae2wtlib.networking.c2s.CycleTerminalPacket;
+import de.mari_023.ae2wtlib.networking.s2c.PickBlockPacket;
 import de.mari_023.ae2wtlib.terminal.IUniversalWirelessTerminalItem;
 import de.mari_023.ae2wtlib.wat.ItemWAT;
 import de.mari_023.ae2wtlib.wat.WATMenu;
@@ -60,6 +61,7 @@ public class AE2wtlib {
         Platform.registerRecipe(CombineSerializer.NAME, Combine.serializer = new CombineSerializer());
 
         ServerNetworkManager.registerServerBoundPacket(CycleTerminalPacket.NAME, CycleTerminalPacket::new);
+        ServerNetworkManager.registerServerBoundPacket(PickBlockPacket.NAME, PickBlockPacket::new);
         HotkeyActions.register(new RestockHotkeyAction(), "ae2wtlib_restock");
         HotkeyActions.register(new MagnetHotkeyAction(), "ae2wtlib_magnet");
 

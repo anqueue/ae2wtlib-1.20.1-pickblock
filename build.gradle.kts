@@ -81,6 +81,9 @@ dependencies {
 
     annotationProcessor("org.spongepowered:mixin:0.8.4:processor")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
+    
+    // MixinExtras
+    implementation("io.github.llamalad7:mixinextras-neoforge:0.4.1")
 
     //testing
     //runtimeOnly(fg.deobf("maven.modrinth:aeinfinitybooster:1.20.1-1.0.0+20"))
@@ -147,6 +150,12 @@ repositories {
         url = uri("https://api.modrinth.com/maven")
         content {
             includeGroup("maven.modrinth")
+        }
+    }
+    maven {
+        url = uri("https://maven.neoforged.net/releases")
+        content {
+            includeGroup("io.github.llamalad7")
         }
     }
 }
